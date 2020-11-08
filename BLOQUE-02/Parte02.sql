@@ -26,6 +26,8 @@ order by fec_inicio desc
 --'___'=> Búsqueda si considera longitud.
 --'[xyz]'= Búsqueda restringida x,y o z.
 --'[^xyz]= Búsqueda restringida a que NO sea x, y ni z.
+--'[a-c]=[abc]=>Búsqueda con parámetros desde y hasta.
+--'[^a-c]=[d-z]=>Búsqueda con complemento y rango.
 select iif(codtipo=1,'LE o DNI','OTRO') as TIPO_DOC,numdoc as NUM_DOC,
 	   upper(concat(rtrim(ltrim(nombres)),' ',rtrim(ltrim(ape_paterno)),' ',rtrim(ltrim(ape_materno)))) as CLIENTE
 from Cliente --check(longitud>10) | (longitud>10)
@@ -38,4 +40,21 @@ where tipo='P'
 --and upper(concat(rtrim(ltrim(nombres)),' ',rtrim(ltrim(ape_paterno)),' ',rtrim(ltrim(ape_materno)))) like '%M__'--f.Nombre completo tenga como antepenúltimo carácter la ‘M’.
 --and upper(concat(rtrim(ltrim(nombres)),' ',rtrim(ltrim(ape_paterno)),' ',rtrim(ltrim(ape_materno)))) like '[aeiou]%[aeiou]' --h.Nombre completo inicie y finalice con una vocal (a,e,i,o,u)
 --and upper(concat(rtrim(ltrim(nombres)),' ',rtrim(ltrim(ape_paterno)),' ',rtrim(ltrim(ape_materno)))) like '[^aeiou]%[^aeiou]'--i.Nombre completo inicie y finalice con una consonante. NOTA: SIEMPRE Y CUANDO SÓLO TENGAMOS CONSONANTES Y VOCALES
-and upper(concat(rtrim(ltrim(nombres)),' ',rtrim(ltrim(ape_paterno)),' ',rtrim(ltrim(ape_materno)))) like '%[f-z]'
+and upper(concat(rtrim(ltrim(nombres)),' ',rtrim(ltrim(ape_paterno)),' ',rtrim(ltrim(ape_materno)))) like '%[^f-z]'
+
+--02.13
+
+select codzona, estado, 
+       COUNT(codcliente) as TOT_CLIENTES,
+	   MIN(fec_inicio) as MIN_FEC_INICIO, 
+	   MAX(fec_inicio) as MAX_FEC_INICIO,
+	   case 
+	   when COUNT(codcliente) between 0 and 19 then 'TOTAL_INFERIOR'
+	   when COUNT(codcliente) between 20 and 39 then 'TOTAL_MEDIO'
+	   when COUNT(codcliente)>=40 then 'TOTAL_SUPERIOR'
+	   else 'NO ES POSIBLE IDENTIFICAR'
+	   end as MENSAJE
+from Cliente
+where tipo='E' 
+group by codzona, estado
+having COUNT(codcliente)>10
