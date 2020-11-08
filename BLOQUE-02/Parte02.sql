@@ -125,3 +125,20 @@ from Cliente
 where tipo='P' 
 group by codzona, estado
 order by TOT_CLIENTES desc
+go
+--02.17
+declare @n int=30,@t int=20
+
+select codcliente as COD_CLIENTE,
+	   upper(concat(rtrim(ltrim(nombres)),' ',rtrim(ltrim(ape_paterno)),' ',rtrim(ltrim(ape_materno)))) as NOMBRE_COMPLETO
+from   Cliente 
+where  tipo='P' 
+order by NOMBRE_COMPLETO asc
+--offset 0 rows=(1-1)*10
+--fetch next 10 rows only--a.Página 1 y tamaño de página 10 [Posición 1 – 10].
+--offset 10 rows=(2-1)*10
+--fetch next 10 rows only--b.Página 2 y tamaño de página 10 [Posición 11-20].
+--offset 20 rows=(3-1)*10
+--fetch next 10 rows only--c.Página 3 y tamaño de página 10 [Posición 21-30].
+offset (@n-1)*@t rows
+fetch next @t rows only
