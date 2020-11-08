@@ -19,3 +19,23 @@ where tipo='E' and fec_inicio between '1998-01-01' and '1998-12-31'
 order by fec_inicio desc
 
 --02.12
+--select LTRIM(RTRIM('   GIANFRANCO MANRIQUE  '))
+--Lower=>Pasa expresión a minúscula
+--Upper=>Pasa expresión a mayuscula
+--%=>Búsqueda sin considerar longitud ni un caracter especial
+--'___'=> Búsqueda si considera longitud.
+--'[xyz]'= Búsqueda restringida x,y o z.
+--'[^xyz]= Búsqueda restringida a que NO sea x, y ni z.
+select iif(codtipo=1,'LE o DNI','OTRO') as TIPO_DOC,numdoc as NUM_DOC,
+	   upper(concat(rtrim(ltrim(nombres)),' ',rtrim(ltrim(ape_paterno)),' ',rtrim(ltrim(ape_materno)))) as CLIENTE
+from Cliente --check(longitud>10) | (longitud>10)
+where tipo='P' 
+--and upper(concat(rtrim(ltrim(nombres)),' ',rtrim(ltrim(ape_paterno)),' ',rtrim(ltrim(ape_materno)))) like 'A%'--a.Nombre completo inicie en ‘A’.
+--and upper(rtrim(ltrim(nombres))) like 'A%'--a.Nombre completo inicie en ‘A’.
+--and upper(concat(rtrim(ltrim(nombres)),' ',rtrim(ltrim(ape_paterno)),' ',rtrim(ltrim(ape_materno)))) like '%AMA%' b.Nombre completo contiene la secuencia ‘AMA’.
+--and upper(concat(rtrim(ltrim(nombres)),' ',rtrim(ltrim(ape_paterno)),' ',rtrim(ltrim(ape_materno)))) like '%AN' c.Nombre completo finaliza en 'AN'
+--and upper(concat(rtrim(ltrim(nombres)),' ',rtrim(ltrim(ape_paterno)),' ',rtrim(ltrim(ape_materno)))) like '_ARI%'--e.Nombre completo contenga la secuencia ‘ARI’ desde la 2° posición.
+--and upper(concat(rtrim(ltrim(nombres)),' ',rtrim(ltrim(ape_paterno)),' ',rtrim(ltrim(ape_materno)))) like '%M__'--f.Nombre completo tenga como antepenúltimo carácter la ‘M’.
+--and upper(concat(rtrim(ltrim(nombres)),' ',rtrim(ltrim(ape_paterno)),' ',rtrim(ltrim(ape_materno)))) like '[aeiou]%[aeiou]' --h.Nombre completo inicie y finalice con una vocal (a,e,i,o,u)
+--and upper(concat(rtrim(ltrim(nombres)),' ',rtrim(ltrim(ape_paterno)),' ',rtrim(ltrim(ape_materno)))) like '[^aeiou]%[^aeiou]'--i.Nombre completo inicie y finalice con una consonante. NOTA: SIEMPRE Y CUANDO SÓLO TENGAMOS CONSONANTES Y VOCALES
+and upper(concat(rtrim(ltrim(nombres)),' ',rtrim(ltrim(ape_paterno)),' ',rtrim(ltrim(ape_materno)))) like '%[f-z]'
