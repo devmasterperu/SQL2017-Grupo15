@@ -58,3 +58,70 @@ from Cliente
 where tipo='E' 
 group by codzona, estado
 having COUNT(codcliente)>10
+
+--02.15
+--nota_01
+declare @n int=15
+
+select top(@n) estado, codzona,
+       COUNT(codcliente) as TOT_CLIENTES,
+	   MIN(rtrim(ltrim(ape_paterno))) as MIN_APE_PAT, --Primer apellido paterno ordenado alfabéticamente A-Z 
+	   MAX(rtrim(ltrim(ape_paterno))) as MAX_APE_PAT, --Último apellido paterno ordenado alfabéticamente A-Z 
+	   case 
+	   when COUNT(codcliente) between 0 and 14 then 'INFERIOR'
+	   when COUNT(codcliente) between 15 and 29 then 'MEDIO'
+	   when COUNT(codcliente)>=30 then 'SUPERIOR'
+	   else 'NO ES POSIBLE IDENTIFICAR'
+	   end as MENSAJE
+from Cliente
+where tipo='P' 
+group by codzona, estado
+order by TOT_CLIENTES desc
+
+--nota_02
+select top(15) percent estado, codzona, --top(15) percent de 22=top(4)
+       COUNT(codcliente) as TOT_CLIENTES,
+	   MIN(rtrim(ltrim(ape_paterno))) as MIN_APE_PAT, --Primer apellido paterno ordenado alfabéticamente A-Z 
+	   MAX(rtrim(ltrim(ape_paterno))) as MAX_APE_PAT, --Último apellido paterno ordenado alfabéticamente A-Z 
+	   case 
+	   when COUNT(codcliente) between 0 and 14 then 'INFERIOR'
+	   when COUNT(codcliente) between 15 and 29 then 'MEDIO'
+	   when COUNT(codcliente)>=30 then 'SUPERIOR'
+	   else 'NO ES POSIBLE IDENTIFICAR'
+	   end as MENSAJE
+from Cliente
+where tipo='P' 
+group by codzona, estado
+order by TOT_CLIENTES desc
+
+--nota_03
+select top(15) with ties estado, codzona, --top(15) percent de 22=top(4)
+       COUNT(codcliente) as TOT_CLIENTES,
+	   MIN(rtrim(ltrim(ape_paterno))) as MIN_APE_PAT, --Primer apellido paterno ordenado alfabéticamente A-Z 
+	   MAX(rtrim(ltrim(ape_paterno))) as MAX_APE_PAT, --Último apellido paterno ordenado alfabéticamente A-Z 
+	   case 
+	   when COUNT(codcliente) between 0 and 14 then 'INFERIOR'
+	   when COUNT(codcliente) between 15 and 29 then 'MEDIO'
+	   when COUNT(codcliente)>=30 then 'SUPERIOR'
+	   else 'NO ES POSIBLE IDENTIFICAR'
+	   end as MENSAJE
+from Cliente
+where tipo='P' 
+group by codzona, estado
+order by TOT_CLIENTES desc
+
+--nota_04
+select top(40) percent with ties estado, codzona, --top(40) percent de 22=top(9)
+       COUNT(codcliente) as TOT_CLIENTES,
+	   MIN(rtrim(ltrim(ape_paterno))) as MIN_APE_PAT, --Primer apellido paterno ordenado alfabéticamente A-Z 
+	   MAX(rtrim(ltrim(ape_paterno))) as MAX_APE_PAT, --Último apellido paterno ordenado alfabéticamente A-Z 
+	   case 
+	   when COUNT(codcliente) between 0 and 14 then 'INFERIOR'
+	   when COUNT(codcliente) between 15 and 29 then 'MEDIO'
+	   when COUNT(codcliente)>=30 then 'SUPERIOR'
+	   else 'NO ES POSIBLE IDENTIFICAR'
+	   end as MENSAJE
+from Cliente
+where tipo='P' 
+group by codzona, estado
+order by TOT_CLIENTES desc
