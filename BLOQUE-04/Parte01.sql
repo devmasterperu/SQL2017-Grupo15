@@ -176,3 +176,77 @@ begin tran
 		   inserted.numdoc,inserted.nombres --Valores nuevos
 	where  codcliente=500
 rollback
+
+--04.11
+
+alter table Contrato add nuevopreciosol decimal(8,2)
+
+--5% DESCUENTO
+select co.* from Contrato co
+inner join PlanInternet p on co.codplan=p.codplan
+where p.nombre in ('PLAN TOTAL I','PLAN TOTAL II','GOLD I','GOLD II','GOLD III','PREMIUM II') and co.periodo='Q'
+
+--10% DESCUENTO
+select co.* from Contrato co
+inner join PlanInternet p on co.codplan=p.codplan
+where p.nombre in ('PLAN TOTAL I','PLAN TOTAL II','GOLD I','GOLD II','GOLD III','PREMIUM II') and co.periodo='M'
+
+--2% DESCUENTO (OTROS)
+begin tran
+	update co
+	set  co.nuevopreciosol= 
+		 case when p.nombre in ('PLAN TOTAL I','PLAN TOTAL II','GOLD I','GOLD II','GOLD III','PREMIUM II') and co.periodo='Q'
+		      then 0.95*p.precioref--5% DESCUENTO
+			  when p.nombre in ('PLAN TOTAL I','PLAN TOTAL II','GOLD I','GOLD II','GOLD III','PREMIUM II') and co.periodo='M'
+			  then 0.90*p.precioref--10% DESCUENTO
+			  else 0.98*p.precioref--2% DESCUENTO
+		 end
+	output inserted.nuevopreciosol, deleted.nuevopreciosol, deleted.preciosol
+	from Contrato co
+	inner join PlanInternet p on co.codplan=p.codplan
+rollback
+
+--5% DESCUENTO
+select p.nombre,co.periodo,p.precioref,0.95*p.precioref,co.nuevopreciosol from Contrato co
+inner join PlanInternet p on co.codplan=p.codplan
+where p.nombre in ('PLAN TOTAL I','PLAN TOTAL II','GOLD I','GOLD II','GOLD III','PREMIUM II') and co.periodo='Q'
+
+--10% DESCUENTO
+select p.nombre,co.periodo,p.precioref,0.90*p.precioref,co.nuevopreciosol from Contrato co
+inner join PlanInternet p on co.codplan=p.codplan
+where p.nombre in ('PLAN TOTAL I','PLAN TOTAL II','GOLD I','GOLD II','GOLD III','PREMIUM II') and co.periodo='M'
+
+--¿Quiénes son los clientes a los cuales no les conviene este nuevo precio?
+select 
+case when c.tipo='P' 
+	 then upper(rtrim(ltrim(nombres))+ ' ' +rtrim(ltrim(ape_paterno)) +' '+rtrim(ltrim(ape_materno)))
+	 when c.tipo='E'
+	 then upper(rtrim(ltrim(razon_social)))
+	 else 'SIN DATO'
+end as [CLIENTE],
+p.[nombre] as [PLAN],
+preciosol as [PRECIO ACTUAL],
+nuevopreciosol as [PRECIO NUEVO] 
+from Contrato co
+left join Cliente c on co.codcliente=c.codcliente
+left join PlanInternet p on co.codplan=p.codplan
+where nuevopreciosol>preciosol
+
+--¿Quiénes son los clientes detectados con un diferencial de S/50.00 a más entre el nuevo precio y el precio actual?
+
+select 
+case when c.tipo='P' 
+	 then upper(rtrim(ltrim(nombres))+ ' ' +rtrim(ltrim(ape_paterno)) +' '+rtrim(ltrim(ape_materno)))
+	 when c.tipo='E'
+	 then upper(rtrim(ltrim(razon_social)))
+	 else 'SIN DATO'
+end as [CLIENTE],
+p.[nombre] as [PLAN],
+preciosol as [PRECIO ACTUAL],
+nuevopreciosol as [PRECIO NUEVO],
+nuevopreciosol-preciosol as DIFERENCIAL
+from Contrato co
+left join Cliente c on co.codcliente=c.codcliente
+left join PlanInternet p on co.codplan=p.codplan
+where nuevopreciosol-preciosol>50
+order by DIFERENCIAL desc
