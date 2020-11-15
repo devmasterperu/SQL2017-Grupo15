@@ -1970,3 +1970,5 @@ insert into contrato(codplan,codcliente,fec_contrato,periodo,preciosol,iprouter,
 go
 insert into contrato(codplan,codcliente,fec_contrato,periodo,preciosol,iprouter,ssis_red_wifi,fec_registro,estado) values (5,1011,'2019-01-15','M',55,'192.168.239.3','RED-968',getdate(),1)
 go
+
+select * from Contrato
