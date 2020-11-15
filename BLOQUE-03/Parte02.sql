@@ -33,3 +33,11 @@ from Contrato co
 full outer join Cliente c on co.codcliente=c.codcliente
 left outer join PlanInternet p on co.codplan=p.codplan
 order by isnull(co.codcliente,0) asc
+
+--SELF JOIN
+--Relación empleados y sus jefes (empleados)
+--select 
+--emp.firstname+ ' ' + emp.lastname as empleado,
+--jef.firstname+ ' ' + jef.lastname as jefe
+--from HR.Employees emp
+--left join HR.Employees jef on emp.mgrid=jef.empid
