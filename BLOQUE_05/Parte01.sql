@@ -53,7 +53,7 @@ select count(codcliente) from Contrato where codplan=1
 select count(codcliente) from Contrato where codplan=2
 select count(codcliente) from Contrato where codplan=3
 
-select codplan,nombre as [PLAN],
+select codplan,replace(upper(nombre),' ','_') as [PLAN],
 	   (select count(codcliente) from Contrato co where co.codplan=p.codplan) as TOTAL,
 	   case 
 	   when (select count(codcliente) from Contrato co where co.codplan=p.codplan) between 0 and 99 then 'Plan de baja demanda.'
@@ -63,3 +63,59 @@ select codplan,nombre as [PLAN],
 	   end as MENSAJE
 from PlanInternet p
 order by TOTAL asc
+
+--begin tran
+--	update p
+--	set nombre=replace(upper(nombre),' ','_')
+--	from PlanInternet p
+--rollback
+
+--05.05
+
+select 5*1.00/2
+
+select replace(upper(nombre),' ','_') as [PLAN],
+	   (select count(codcliente) from Contrato co where co.codplan=p.codplan) as [TOTAL-P],
+	   (select count(codcliente) from Contrato co) as [TOTAL],
+	   cast(
+		   round(
+			   (select count(codcliente) from Contrato co where co.codplan=p.codplan)*100.00/
+			   (select count(codcliente) from Contrato co),--Expresion
+			   2                                           --Redondeo al centesimo
+		   ) as decimal(6,2)                               --Transformar a decimal(6,2)
+	   ) as PORCENTAJE
+from PlanInternet p
+order by [TOTAL-P] asc
+
+--05.07
+--m01
+
+select replace(upper(nombre),' ','_') as [PLAN],
+	   isnull((select count(codcliente) from Contrato co where co.codplan=p.codplan),0) as [CO-TOTAL],
+	   isnull((select avg(co.preciosol) from Contrato co where co.codplan=p.codplan),0.00) as [CO-PROM],
+	   isnull((select min(co.fec_contrato) from Contrato co where co.codplan=p.codplan),'9999-12-31') as [CO-ANTIGUO],
+	   isnull((select max(co.fec_contrato) from Contrato co where co.codplan=p.codplan),'9999-12-31') as [CO-RECIENTE]
+from PlanInternet p
+order by [CO-TOTAL] asc
+
+--m02
+
+select codplan,count(codcliente) as total,avg(co.preciosol) as prom,
+       min(co.fec_contrato) as antiguo, max(co.fec_contrato) as reciente
+from Contrato co
+group by codplan
+
+--Consulta padre
+select replace(upper(nombre),' ','_') as [PLAN],
+	   isnull(rp.total,0) as [CO-TOTAL],
+	   isnull(rp.prom,0.00) as [CO-PROM],
+	   isnull(rp.antiguo,'9999-12-31') as [CO-ANTIGUO],
+	   isnull(rp.reciente,'9999-12-31') as [CO-RECIENTE]
+from PlanInternet p left join
+(   --Tabla derivada (Consulta Hija)
+	select codplan,count(codcliente) as total,avg(co.preciosol) as prom,
+           min(co.fec_contrato) as antiguo, max(co.fec_contrato) as reciente
+	from   Contrato co
+	group by codplan
+) rp on p.codplan=rp.codplan 
+order by [CO-TOTAL] asc
