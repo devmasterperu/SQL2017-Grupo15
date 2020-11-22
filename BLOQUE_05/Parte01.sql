@@ -88,7 +88,7 @@ from PlanInternet p
 order by [TOTAL-P] asc
 
 --05.07
---m01
+--m01 (Subconsultas SELECT)
 
 select replace(upper(nombre),' ','_') as [PLAN],
 	   isnull((select count(codcliente) from Contrato co where co.codplan=p.codplan),0) as [CO-TOTAL],
@@ -98,7 +98,7 @@ select replace(upper(nombre),' ','_') as [PLAN],
 from PlanInternet p
 order by [CO-TOTAL] asc
 
---m02
+--m02 (Subconsultas FROM)
 
 select codplan,count(codcliente) as total,avg(co.preciosol) as prom,
        min(co.fec_contrato) as antiguo, max(co.fec_contrato) as reciente
@@ -119,3 +119,52 @@ from PlanInternet p left join
 	group by codplan
 ) rp on p.codplan=rp.codplan 
 order by [CO-TOTAL] asc
+
+--m03 (ctes)
+
+with CTE_RP as 
+(   --Consulta interna
+	select codplan,count(codcliente) as total,avg(co.preciosol) as prom,
+           min(co.fec_contrato) as antiguo, max(co.fec_contrato) as reciente
+	from   Contrato co
+	group by codplan
+), 
+CTE_RZ as 
+(   --Consulta interna
+	 select codubigeo,count(codzona) as total 
+	 from Zona
+	 group by codubigeo
+)   --Consulta externa
+select replace(upper(nombre),' ','_') as [PLAN],
+	   isnull(rp.total,0) as [CO-TOTAL],
+	   isnull(rp.prom,0.00) as [CO-PROM],
+	   isnull(rp.antiguo,'9999-12-31') as [CO-ANTIGUO],
+	   isnull(rp.reciente,'9999-12-31') as [CO-RECIENTE],
+	   (select count(1) from CTE_RZ) as TOTAL
+from PlanInternet p left join
+CTE_RP rp on p.codplan=rp.codplan 
+order by [CO-TOTAL] asc
+
+--05.09
+
+select c.codcliente as [COD-CLIENTE], 
+       upper(rtrim(ltrim(nombres+' '+ape_paterno+' '+ape_materno))) as CLIENTE,
+	   isnull(rt.total,0)  as [TOT-TE],
+	   isnull(rco.total,0) as [TOT-CO]
+from Cliente c
+left join
+(
+	select codcliente,count(numero) as total 
+	from Telefono 
+	where estado=1
+	group by codcliente
+) rt on c.codcliente=rt.codcliente
+left join
+(
+	select codcliente,count(codplan) as total 
+	from Contrato 
+	where estado=1
+	group by codcliente
+) rco on c.codcliente=rco.codcliente
+where tipo='P'
+order by [TOT-TE] asc,[TOT-CO] asc
